@@ -65,7 +65,7 @@ export default function ConfiguracoesPage() {
             {users.map(u => (
               <div key={u.id} className="config-item">
                 <div style={{ display: "flex", alignItems: "center", gap: 12, width: "100%" }}>
-                  <span style={{ fontSize: "1.5rem" }}>{u.avatar}</span>
+                  <span style={{ fontSize: "1.5rem" }}>{u.avatar_emoji}</span>
                   <div style={{ flex: 1 }}>
                     <strong>{u.name}</strong>
                   </div>

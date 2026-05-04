@@ -19,7 +19,7 @@ export default function TaskForm({ isOpen, onClose, onSubmit, users = [], editTa
       recurrence: "unica",
       assigned_to: "",
       assigned_to_name: "",
-      requiresEvidence: true,
+      requires_evidence: true,
       due_date: "",
     }
   );
@@ -46,7 +46,7 @@ export default function TaskForm({ isOpen, onClose, onSubmit, users = [], editTa
       description: template.description,
       category: template.category,
       priority: template.priority,
-      requiresEvidence: template.requiresEvidence,
+      requires_evidence: template.requires_evidence,
     }));
     setShowTemplates(false);
   }
@@ -63,7 +63,7 @@ export default function TaskForm({ isOpen, onClose, onSubmit, users = [], editTa
     setFormData({
       title: "", description: "", category: "geral", priority: "media",
       recurrence: "unica", assigned_to: "", assigned_to_name: "",
-      requiresEvidence: true, due_date: "",
+      requires_evidence: true, due_date: "",
     });
   }
 
@@ -172,8 +172,8 @@ export default function TaskForm({ isOpen, onClose, onSubmit, users = [], editTa
         <label style={{ display: "flex", alignItems: "center", gap: 8, fontSize: "0.85rem", cursor: "pointer" }}>
           <input
             type="checkbox"
-            checked={formData.requiresEvidence}
-            onChange={(e) => handleChange("requiresEvidence", e.target.checked)}
+            checked={formData.requires_evidence}
+            onChange={(e) => handleChange("requires_evidence", e.target.checked)}
             style={{ width: 18, height: 18 }}
           />
           📸 Exige evidência fotográfica

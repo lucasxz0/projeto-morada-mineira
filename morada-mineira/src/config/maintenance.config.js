@@ -13,28 +13,28 @@ export const MAINTENANCE_TEMPLATES = [
     category: "limpeza",
     priority: "media",
     description: "Varrer, passar pano no chão, limpar mesas e cadeiras, limpar vidros.",
-    requiresEvidence: true,
+    requires_evidence: true,
   },
   {
     title: "Limpeza da cozinha / área de produção",
     category: "limpeza",
     priority: "alta",
     description: "Lavar bancadas, desinfetar superfícies, limpar piso e ralos.",
-    requiresEvidence: true,
+    requires_evidence: true,
   },
   {
     title: "Limpeza dos banheiros",
     category: "limpeza",
     priority: "alta",
     description: "Lavar pisos, vasos, pias. Repor sabonete, papel higiênico e papel toalha.",
-    requiresEvidence: true,
+    requires_evidence: true,
   },
   {
     title: "Limpeza da fachada e calçada",
     category: "limpeza",
     priority: "baixa",
     description: "Lavar calçada, limpar fachada, verificar iluminação externa.",
-    requiresEvidence: true,
+    requires_evidence: true,
   },
 
   // ── PRODUÇÃO ──
@@ -43,14 +43,14 @@ export const MAINTENANCE_TEMPLATES = [
     category: "producao",
     priority: "alta",
     description: "Verificar todos os ingredientes e utensílios preparados para a produção do dia.",
-    requiresEvidence: false,
+    requires_evidence: false,
   },
   {
     title: "Verificar validade dos insumos",
     category: "producao",
     priority: "urgente",
     description: "Checar data de validade de todos os insumos na área de produção e estoque.",
-    requiresEvidence: true,
+    requires_evidence: true,
   },
 
   // ── ESTOQUE ──
@@ -59,21 +59,21 @@ export const MAINTENANCE_TEMPLATES = [
     category: "estoque",
     priority: "media",
     description: "Contar itens do estoque e comparar com sistema. Listar itens a comprar.",
-    requiresEvidence: true,
+    requires_evidence: true,
   },
   {
     title: "Organizar estoque seco",
     category: "estoque",
     priority: "baixa",
     description: "Organizar prateleiras, etiquetas FIFO, verificar vencimentos.",
-    requiresEvidence: true,
+    requires_evidence: true,
   },
   {
     title: "Recebimento de mercadorias",
     category: "estoque",
     priority: "alta",
     description: "Conferir NF, qualidade dos produtos, armazenar corretamente.",
-    requiresEvidence: true,
+    requires_evidence: true,
   },
 
   // ── EQUIPAMENTOS ──
@@ -82,21 +82,21 @@ export const MAINTENANCE_TEMPLATES = [
     category: "equipamentos",
     priority: "media",
     description: "Lubrificar, verificar correias, limpar interna e externamente.",
-    requiresEvidence: true,
+    requires_evidence: true,
   },
   {
     title: "Verificar funcionamento da balança",
     category: "equipamentos",
     priority: "alta",
     description: "Calibrar balança, verificar precisão com peso padrão.",
-    requiresEvidence: true,
+    requires_evidence: true,
   },
   {
     title: "Limpeza da modeladora de pão",
     category: "equipamentos",
     priority: "media",
     description: "Limpar rolos, verificar ajuste, lubrificar partes móveis.",
-    requiresEvidence: true,
+    requires_evidence: true,
   },
 
   // ── REFRIGERAÇÃO ──
@@ -105,21 +105,21 @@ export const MAINTENANCE_TEMPLATES = [
     category: "refrigeracao",
     priority: "urgente",
     description: "Registrar temperatura de todas as geladeiras e freezers. Faixa ideal: 0-5°C (geladeira) e -18°C (freezer).",
-    requiresEvidence: true,
+    requires_evidence: true,
   },
   {
     title: "Limpeza dos freezers",
     category: "refrigeracao",
     priority: "media",
     description: "Descongelar, limpar internamente, organizar produtos.",
-    requiresEvidence: true,
+    requires_evidence: true,
   },
   {
     title: "Manutenção do ar condicionado",
     category: "refrigeracao",
     priority: "baixa",
     description: "Limpar filtros, verificar funcionamento, agendar manutenção se necessário.",
-    requiresEvidence: true,
+    requires_evidence: true,
   },
 
   // ── FORNOS ──
@@ -128,14 +128,14 @@ export const MAINTENANCE_TEMPLATES = [
     category: "forno",
     priority: "alta",
     description: "Limpar interior do forno, bandejas, verificar borrachas de vedação.",
-    requiresEvidence: true,
+    requires_evidence: true,
   },
   {
     title: "Verificar pedra refratária",
     category: "forno",
     priority: "media",
     description: "Inspecionar pedras refratárias, verificar rachaduras ou desgaste.",
-    requiresEvidence: true,
+    requires_evidence: true,
   },
 
   // ── VITRINE ──
@@ -144,14 +144,14 @@ export const MAINTENANCE_TEMPLATES = [
     category: "vitrine",
     priority: "alta",
     description: "Arrumar produtos na vitrine, verificar preços, repor etiquetas.",
-    requiresEvidence: true,
+    requires_evidence: true,
   },
   {
     title: "Limpeza do balcão refrigerado",
     category: "vitrine",
     priority: "media",
     description: "Limpar vidros, verificar iluminação, conferir temperatura.",
-    requiresEvidence: true,
+    requires_evidence: true,
   },
 
   // ── HIGIENE / SANITIZAÇÃO ──
@@ -160,21 +160,21 @@ export const MAINTENANCE_TEMPLATES = [
     category: "higiene",
     priority: "urgente",
     description: "Agendar e acompanhar serviço de dedetização. Guardar certificado.",
-    requiresEvidence: true,
+    requires_evidence: true,
   },
   {
     title: "Troca de armadilhas de pragas",
     category: "higiene",
     priority: "media",
     description: "Verificar e substituir armadilhas para insetos e roedores.",
-    requiresEvidence: true,
+    requires_evidence: true,
   },
   {
     title: "Limpeza da caixa de gordura",
     category: "higiene",
     priority: "media",
     description: "Limpar caixa de gordura, verificar escoamento.",
-    requiresEvidence: true,
+    requires_evidence: true,
   },
 
   // ── ELÉTRICA ──
@@ -183,7 +183,7 @@ export const MAINTENANCE_TEMPLATES = [
     category: "eletrica",
     priority: "baixa",
     description: "Trocar lâmpadas queimadas, verificar reatores e fiação exposta.",
-    requiresEvidence: true,
+    requires_evidence: true,
   },
 
   // ── HIDRÁULICA ──
@@ -192,7 +192,7 @@ export const MAINTENANCE_TEMPLATES = [
     category: "hidraulica",
     priority: "baixa",
     description: "Testar todas as torneiras, verificar vazamentos, consertar descargas.",
-    requiresEvidence: true,
+    requires_evidence: true,
   },
 
   // ── GERAL ──
@@ -201,6 +201,6 @@ export const MAINTENANCE_TEMPLATES = [
     category: "geral",
     priority: "baixa",
     description: "Verificar pintura, portas, janelas, fechaduras, piso.",
-    requiresEvidence: true,
+    requires_evidence: true,
   },
 ];

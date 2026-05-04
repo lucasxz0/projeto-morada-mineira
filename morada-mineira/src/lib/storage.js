@@ -3,6 +3,7 @@
 // =============================================
 // Funciona com localStorage como fallback
 // e Supabase quando configurado.
+// Tabela de usuários/perfis é 'profiles'
 // =============================================
 
 import { supabase, isSupabaseConfigured } from "./supabase";
@@ -114,7 +115,7 @@ export const storage = {
   // Tasks
   async getTasks(filters = {}) {
     if (isSupabaseConfigured) {
-      return await getFromSupabase("tasks", { order: { column: "created_at" } });
+      return await getFromSupabase("tasks_with_users", { order: { column: "created_at" } });
     }
     return getFromLocal("morada_tasks") || [];
   },
@@ -209,31 +210,31 @@ export const storage = {
     });
   },
 
-  // Users (simulated for localStorage)
+  // Users (profiles)
   async getUsers() {
     if (isSupabaseConfigured) {
-      return await getFromSupabase("users");
+      return await getFromSupabase("profiles");
     }
-    const localUsers = getFromLocal("morada_users");
+    const localUsers = getFromLocal("morada_profiles");
     if (localUsers && Array.isArray(localUsers) && localUsers.length > 0) {
       return localUsers;
     }
     return [
-      { id: "gerente-1", name: "Gerente", role: "gerente", avatar: "👔" },
-      { id: "func-1", name: "João Silva", role: "funcionario", avatar: "👷" },
-      { id: "func-2", name: "Maria Santos", role: "funcionario", avatar: "👷" },
+      { id: "gerente-1", name: "Gerente", role: "gerente", avatar_emoji: "👔" },
+      { id: "func-1", name: "João Silva", role: "funcionario", avatar_emoji: "👷" },
+      { id: "func-2", name: "Maria Santos", role: "funcionario", avatar_emoji: "👷" },
     ];
   },
 
   async updateUser(id, updates) {
     if (isSupabaseConfigured) {
-      return await updateInSupabase("users", id, updates);
+      return await updateInSupabase("profiles", id, updates);
     }
     const localUsers = await this.getUsers();
     const idx = localUsers.findIndex((u) => u.id === id);
     if (idx === -1) return null;
     localUsers[idx] = { ...localUsers[idx], ...updates };
-    setToLocal("morada_users", localUsers);
+    setToLocal("morada_profiles", localUsers);
     return localUsers[idx];
   },
 };
