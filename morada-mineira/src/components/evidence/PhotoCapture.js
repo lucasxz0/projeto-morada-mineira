@@ -6,6 +6,7 @@ import { compressImage, fileToBase64 } from "@/lib/imageUtils";
 export default function PhotoCapture({ onCapture, taskId }) {
   const fileInputRef = useRef(null);
   const [preview, setPreview] = useState(null);
+  const [imageBlob, setImageBlob] = useState(null); // Novo estado para o arquivo real
   const [description, setDescription] = useState("");
   const [loading, setLoading] = useState(false);
 
@@ -17,7 +18,9 @@ export default function PhotoCapture({ onCapture, taskId }) {
     try {
       const compressed = await compressImage(file, { maxWidth: 1200, quality: 0.7 });
       const base64 = await fileToBase64(compressed);
-      setPreview(base64);
+      
+      setPreview(base64); // Usado apenas para mostrar a miniatura na tela
+      setImageBlob(compressed); // Guardando o arquivo real para enviar pro Supabase
     } catch (err) {
       console.error("Erro ao processar imagem:", err);
     } finally {
@@ -26,20 +29,24 @@ export default function PhotoCapture({ onCapture, taskId }) {
   }
 
   function handleSubmit() {
-    if (!preview) return;
+    if (!preview || !imageBlob) return;
+    
     onCapture({
-      image_url: preview,
+      file: imageBlob, // Enviando o arquivo em vez do texto Base64
       description,
       task_id: taskId,
       status: "pendente",
       captured_at: new Date().toISOString(),
     });
+    
     setPreview(null);
+    setImageBlob(null);
     setDescription("");
   }
 
   function handleRemovePreview() {
     setPreview(null);
+    setImageBlob(null);
     setDescription("");
     if (fileInputRef.current) fileInputRef.current.value = "";
   }

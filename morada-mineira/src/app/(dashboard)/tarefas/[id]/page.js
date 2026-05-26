@@ -16,7 +16,20 @@ export default function TaskDetailPage() {
   const { id } = useParams();
   const router = useRouter();
   const { user, isGerente } = useAuth();
-  const { getTaskById, getEvidencesByTask, updateTask, deleteTask, addEvidence, approveEvidence, rejectEvidence, deleteEvidence } = useTasks();
+  
+  // Adicionamos o uploadEvidenceImage aqui na desestruturação
+  const { 
+    getTaskById, 
+    getEvidencesByTask, 
+    updateTask, 
+    deleteTask, 
+    addEvidence, 
+    approveEvidence, 
+    rejectEvidence, 
+    deleteEvidence,
+    uploadEvidenceImage 
+  } = useTasks();
+  
   const toast = useToast();
 
   const [showCapture, setShowCapture] = useState(false);
@@ -56,8 +69,29 @@ export default function TaskDetailPage() {
     }
   }
 
+  // --- FUNÇÃO ATUALIZADA PARA ENVIAR PRO STORAGE ---
   async function handleEvidenceCapture(evidenceData) {
-    const result = await addEvidence({ ...evidenceData, captured_by: user?.id });
+    // 1. Extraímos o arquivo real (file) do resto dos dados
+    const { file, ...restData } = evidenceData;
+
+    toast.info("Enviando foto para o servidor...");
+    
+    // 2. Faz o upload da foto para o bucket "evidencias" no Supabase
+    const uploadedUrl = await uploadEvidenceImage(file, task.id);
+
+    if (!uploadedUrl) {
+      toast.error("Erro ao enviar a imagem. Tente novamente.");
+      return;
+    }
+
+    // 3. Salva no banco de dados usando a URL pública do Storage
+    const result = await addEvidence({ 
+      ...restData, 
+      image_url: uploadedUrl,
+      storage_path: uploadedUrl,
+      captured_by: user?.id 
+    });
+
     if (result) {
       toast.success("Evidência enviada com sucesso!");
       setShowCapture(false);

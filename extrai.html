@@ -3,132 +3,377 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Extrator de Código de ZIP</title>
-    <!-- Biblioteca JSZip para ler arquivos zip no navegador -->
+    <title>Extrator de Código (Anti-Lixo & Estável)</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
     <style>
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background-color: #f4f4f9;
-            color: #333;
+            background-color: #1e1e2e;
+            color: #cdd6f4;
             max-width: 900px;
             margin: 0 auto;
             padding: 20px;
         }
-        h1 { color: #2c3e50; }
+        h1 { color: #89b4fa; }
+        p { color: #bac2de; }
         .container {
-            background: white;
+            background: #313244;
             padding: 20px;
             border-radius: 8px;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            box-shadow: 0 4px 10px rgba(0,0,0,0.5);
         }
-        .controls {
+        .controls-group {
             display: flex;
-            gap: 10px;
+            flex-wrap: wrap;
+            gap: 15px;
             margin-bottom: 20px;
-            align-items: center;
+            background-color: #181825;
+            padding: 15px;
+            border-radius: 6px;
+            border: 1px solid #45475a;
+        }
+        .input-box {
+            flex: 1;
+            min-width: 250px;
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+        }
+        .input-box label {
+            font-weight: bold;
+            font-size: 0.9em;
+            color: #a6adc8;
         }
         input[type="file"] {
-            padding: 10px;
-            border: 1px solid #ccc;
+            padding: 8px;
+            border: 1px solid #585b70;
             border-radius: 4px;
-            flex-grow: 1;
+            background-color: #11111b;
+            color: #cdd6f4;
+        }
+        
+        .action-panel {
+            display: none;
+            background-color: #181825;
+            padding: 15px;
+            border-radius: 6px;
+            border: 1px solid #a6e3a1;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+        .action-panel h2 { margin-top: 0; color: #a6e3a1; }
+        .batch-info {
+            font-size: 1.1em;
+            margin-bottom: 15px;
+            color: #bac2de;
+        }
+        .percent-badge {
+            font-weight: bold;
+            color: #a6e3a1;
+            font-size: 1.3em;
+            background: rgba(166, 227, 161, 0.1);
+            padding: 2px 8px;
+            border-radius: 4px;
+            margin-left: 5px;
+        }
+        .btn-group {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            margin-top: 15px;
         }
         button {
-            background-color: #27ae60;
-            color: white;
             border: none;
-            padding: 12px 20px;
-            border-radius: 4px;
+            padding: 15px 30px;
+            border-radius: 6px;
             cursor: pointer;
             font-weight: bold;
+            font-size: 1.1em;
+            transition: all 0.2s;
         }
-        button:hover { background-color: #219150; }
+        #copyBtn { background-color: #89b4fa; color: #11111b; }
+        #copyBtn:hover { background-color: #74c7ec; }
+        #copyBtn.copied { background-color: #a6e3a1; }
+        
+        #nextBtn { background-color: #f9e2af; color: #11111b; }
+        #nextBtn:hover { background-color: #f38ba8; color: white; }
+
+        .status {
+            background-color: #45475a;
+            padding: 15px;
+            border-radius: 4px;
+            margin-bottom: 20px;
+            font-weight: bold;
+            color: #f5e0dc;
+            text-align: center;
+            font-size: 1.2em;
+        }
+        .realtime-percent {
+            color: #f9e2af;
+            font-size: 1.5em;
+        }
+        .warning-text { color: #f38ba8; font-size: 0.9em; display: block; margin-top: 5px;}
+
         textarea {
             width: 100%;
             height: 500px;
             font-family: 'Courier New', Courier, monospace;
             padding: 15px;
-            border: 1px solid #ccc;
+            border: 1px solid #585b70;
             border-radius: 4px;
             resize: vertical;
             box-sizing: border-box;
-            background-color: #fdfdfd;
+            background-color: #11111b;
+            color: #a6e3a1;
             white-space: pre;
         }
     </style>
 </head>
 <body>
     <div class="container">
-        <h1>Leitor de ZIP para Texto</h1>
-        <p>Selecione um arquivo <b>.zip</b>. O programa irá ler todos os arquivos dentro dele (e de suas subpastas) e gerar um "textão" único com o conteúdo.</p>
+        <h1>Força Bruta: Estável & Anti-Lixo</h1>
+        <p>Ignora automaticamente pastas inúteis como <b>node_modules</b> e <b>.git</b>. Extrai apenas o SEU código fonte verdadeiro.</p>
         
-        <div class="controls">
-            <input type="file" id="fileInput" accept=".zip" />
-            <button id="copyBtn">Copiar Tudo</button>
+        <div class="controls-group">
+            <div class="input-box">
+                <label for="fileInput">📁 Selecionar Arquivo .ZIP</label>
+                <input type="file" id="fileInput" accept=".zip" />
+            </div>
+            <div class="input-box">
+                <label for="folderInput">📂 Selecionar Pasta Inteira</label>
+                <input type="file" id="folderInput" webkitdirectory directory multiple />
+            </div>
+        </div>
+
+        <div id="status" class="status">Aguardando arquivo ou pasta...</div>
+
+        <div id="actionPanel" class="action-panel">
+            <h2 id="batchTitle">Lote Carregado!</h2>
+            <div id="batchInfo" class="batch-info">Arquivos prontos para cópia.</div>
+            <div class="btn-group">
+                <button id="copyBtn">📋 1º: Copiar Lote Atual</button>
+                <button id="nextBtn">⏩ 2º: Prosseguir</button>
+            </div>
         </div>
         
-        <textarea id="output" placeholder="O resultado aparecerá aqui..." readonly></textarea>
+        <textarea id="output" placeholder="O texto dos arquivos aparecerá aqui..." readonly></textarea>
     </div>
 
     <script>
-        document.getElementById('fileInput').addEventListener('change', function(event) {
+        // Pastas que serão sumariamente ignoradas (o câncer dos projetos web)
+        const IGNORED_FOLDERS = ['/node_modules/', '/.git/', '/.vscode/', '/.next/', '/dist/', '/build/', '/out/', '/coverage/'];
+        
+        const textExtensions = ['.txt', '.py', '.js', '.html', '.css', '.json', '.md', '.csv', '.java', '.cpp', '.c', '.h', '.cs', '.php', '.rb', '.go', '.rs', '.ts', '.jsx', '.tsx', '.xml', '.yml', '.yaml', '.sh', '.sql'];
+
+        const BATCH_SIZE = 5000;
+        const MICRO_BATCH = 100;
+        const MAX_FILE_SIZE = 1.5 * 1024 * 1024; // Trava: 1.5 MB
+
+        let pendingFiles = []; 
+        let currentIndex = 0;  
+
+        const statusArea = document.getElementById('status');
+        const outputArea = document.getElementById('output');
+        const fileInput = document.getElementById('fileInput');
+        const folderInput = document.getElementById('folderInput');
+        const actionPanel = document.getElementById('actionPanel');
+        const batchTitle = document.getElementById('batchTitle');
+        const batchInfo = document.getElementById('batchInfo');
+        const copyBtn = document.getElementById('copyBtn');
+        const nextBtn = document.getElementById('nextBtn');
+
+        function resetState() {
+            pendingFiles = [];
+            currentIndex = 0;
+            outputArea.value = "";
+            actionPanel.style.display = "none";
+            copyBtn.innerText = "📋 1º: Copiar Lote Atual";
+            copyBtn.classList.remove('copied');
+        }
+
+        // Nova verificação blindada (ignora pastas inúteis e checa extensão)
+        function isAllowed(filename) {
+            // Converte para um formato seguro para buscar as barras
+            const normalizedPath = '/' + filename.replace(/\\/g, '/') + '/';
+            
+            // Checa se o caminho do arquivo passa por alguma pasta proibida
+            const isIgnored = IGNORED_FOLDERS.some(folder => normalizedPath.includes(folder));
+            if (isIgnored) return false;
+
+            // Se for permitido, verifica a extensão
+            const ext = filename.slice((filename.lastIndexOf(".") - 1 >>> 0) + 2).toLowerCase();
+            return textExtensions.includes('.' + ext) || !filename.includes('.');
+        }
+
+        const yieldToBrowser = () => new Promise(resolve => setTimeout(resolve, 0));
+
+        async function processNextBatch() {
+            if (currentIndex >= pendingFiles.length) return;
+
+            actionPanel.style.display = "none";
+            outputArea.value = "Extraindo texto. Aguarde...";
+            
+            const batch = pendingFiles.slice(currentIndex, currentIndex + BATCH_SIZE);
+            const totalInBatch = batch.length;
+            let processedInBatch = 0;
+            let batchResults = [];
+
+            statusArea.innerHTML = `Processando Lote Atual: <span class="realtime-percent">0%</span> (${totalInBatch} arquivos limpos)`;
+
+            for (let i = 0; i < totalInBatch; i += MICRO_BATCH) {
+                const microBatch = batch.slice(i, i + MICRO_BATCH);
+                
+                const results = await Promise.all(microBatch.map(async (fileObj) => {
+                    if (fileObj.size && fileObj.size > MAX_FILE_SIZE) {
+                        return `=== Arquivo: ${fileObj.name} ===\n[Ignorado: Arquivo maior que 1.5MB]\n\n`;
+                    }
+
+                    try {
+                        const content = await fileObj.readFunc();
+                        if (content.length > MAX_FILE_SIZE) {
+                             return `=== Arquivo: ${fileObj.name} ===\n[Ignorado: Texto extraído gigante (> 1.5MB)]\n\n`;
+                        }
+                        return `=== Arquivo: ${fileObj.name} ===\n${content}\n\n`;
+                    } catch (e) {
+                        return `=== Arquivo: ${fileObj.name} ===\n[Erro ao ler: ${e.message}]\n\n`;
+                    }
+                }));
+
+                batchResults.push(...results);
+                processedInBatch += microBatch.length;
+
+                const percent = Math.min(98, Math.round((processedInBatch / totalInBatch) * 100));
+                statusArea.innerHTML = `Processando Lote Atual: <span class="realtime-percent">${percent}%</span> (${processedInBatch}/${totalInBatch})`;
+
+                await yieldToBrowser();
+            }
+
+            statusArea.innerHTML = `Quase lá... <span class="realtime-percent">99%</span> <br><span class="warning-text">Montando os textos na caixa...</span>`;
+            await yieldToBrowser(); 
+            await new Promise(r => setTimeout(r, 100)); 
+
+            outputArea.value = batchResults.join("");
+            
+            currentIndex += batch.length;
+            const remaining = pendingFiles.length - currentIndex;
+
+            statusArea.innerText = `Lote finalizado com sucesso.`;
+            batchTitle.innerText = `Lote de ${batch.length} arquivos pronto!`;
+            
+            if (remaining > 0) {
+                const totalPercent = Math.round((currentIndex / pendingFiles.length) * 100);
+                batchInfo.innerHTML = `Progresso Total: <b>${currentIndex}</b> de <b>${pendingFiles.length}</b> <span class="percent-badge">${totalPercent}%</span><br>Restam: ${remaining}`;
+                nextBtn.style.display = "inline-block";
+                nextBtn.innerText = `⏩ 2º: Prosseguir (Ler próximos ${Math.min(remaining, BATCH_SIZE)})`;
+            } else {
+                batchInfo.innerHTML = `Todos os <b>${pendingFiles.length}</b> arquivos válidos processados! <span class="percent-badge">100%</span>`;
+                nextBtn.style.display = "none";
+            }
+
+            actionPanel.style.display = "block";
+            copyBtn.innerText = "📋 1º: Copiar Lote Atual";
+            copyBtn.classList.remove('copied');
+            
+            window.scrollTo(0, 0);
+        }
+
+        // ==========================================
+        // BOTÕES
+        // ==========================================
+        copyBtn.addEventListener('click', async function() {
+            try {
+                await navigator.clipboard.writeText(outputArea.value);
+                copyBtn.classList.add('copied');
+                copyBtn.innerText = "✅ Copiado!";
+            } catch (err) {
+                outputArea.select();
+                document.execCommand('copy');
+                copyBtn.classList.add('copied');
+                copyBtn.innerText = "✅ Copiado!";
+            }
+        });
+
+        nextBtn.addEventListener('click', function() {
+            processNextBatch();
+        });
+
+        // ==========================================
+        // CARREGAR ZIP
+        // ==========================================
+        fileInput.addEventListener('change', async function(event) {
             const file = event.target.files[0];
             if (!file) return;
-
-            const outputArea = document.getElementById('output');
-            outputArea.value = "Lendo o arquivo ZIP, por favor aguarde... (Isso pode levar alguns segundos dependendo do tamanho)";
+            
+            folderInput.value = "";
+            resetState();
+            statusArea.innerText = "Mapeando estrutura do ZIP filtrando lixo...";
 
             const zip = new JSZip();
-            
-            zip.loadAsync(file).then(function(contents) {
-                let finalString = "codigo da pasta\n\n";
-                let promises = [];
-
-                // Lista de extensões comuns de texto/código (para evitar ler imagens como texto)
-                const textExtensions = ['.txt', '.py', '.js', '.html', '.css', '.json', '.md', '.csv', '.java', '.cpp', '.c', '.h', '.cs', '.php', '.rb', '.go', '.rs', '.ts', '.jsx', '.tsx', '.xml', '.yml', '.yaml', '.sh', '.sql'];
-
-                // Iterar sobre cada arquivo no ZIP
-                Object.keys(contents.files).forEach(function(filename) {
+            try {
+                const contents = await zip.loadAsync(file);
+                
+                Object.keys(contents.files).forEach(filename => {
                     const zipEntry = contents.files[filename];
+                    let size = zipEntry._data ? zipEntry._data.uncompressedSize : 0;
                     
-                    // Ignorar pastas
-                    if (!zipEntry.dir) {
-                        // Opcional: verificar se é um arquivo de texto baseado na extensão
-                        const ext = filename.slice((filename.lastIndexOf(".") - 1 >>> 0) + 2).toLowerCase();
-                        const isLikelyText = textExtensions.includes('.' + ext) || !filename.includes('.');
-
-                        if (isLikelyText) {
-                            const promise = zipEntry.async("string").then(function(content) {
-                                return `=== Arquivo: ${filename} ===\n${content}\n\n`;
-                            });
-                            promises.push(promise);
-                        } else {
-                            promises.push(Promise.resolve(`=== Arquivo: ${filename} ===\n[Arquivo binário ou não-texto ignorado]\n\n`));
-                        }
+                    if (!zipEntry.dir && isAllowed(filename)) {
+                        pendingFiles.push({
+                            name: filename,
+                            size: size,
+                            readFunc: () => zipEntry.async("string")
+                        });
                     }
                 });
 
-                Promise.all(promises).then(function(results) {
-                    finalString += results.join("");
-                    outputArea.value = finalString;
-                });
+                if (pendingFiles.length === 0) {
+                    statusArea.innerText = "Nenhum arquivo de texto útil encontrado no ZIP.";
+                    return;
+                }
 
-            }).catch(function(err) {
-                outputArea.value = "Erro ao ler o arquivo ZIP: " + err.message + "\nCertifique-se de que é um arquivo .zip válido.";
-            });
+                processNextBatch();
+
+            } catch (err) {
+                statusArea.innerText = "Erro ao processar arquivo ZIP: " + err.message;
+            }
         });
 
-        document.getElementById('copyBtn').addEventListener('click', function() {
-            const outputArea = document.getElementById('output');
-            if (!outputArea.value) {
-                alert("Não há texto para copiar ainda!");
+        // ==========================================
+        // CARREGAR PASTA
+        // ==========================================
+        folderInput.addEventListener('change', function(event) {
+            const files = event.target.files;
+            if (!files || files.length === 0) return;
+
+            fileInput.value = "";
+            resetState();
+            statusArea.innerText = "Mapeando estrutura da Pasta filtrando lixo...";
+
+            const filesArray = Array.from(files);
+
+            filesArray.forEach(file => {
+                const filename = file.webkitRelativePath || file.name;
+                if (isAllowed(filename)) {
+                    pendingFiles.push({
+                        name: filename,
+                        size: file.size, 
+                        readFunc: () => new Promise((resolve, reject) => {
+                            const reader = new FileReader();
+                            reader.onload = e => resolve(e.target.result);
+                            reader.onerror = e => reject(new Error("Falha na leitura local"));
+                            reader.readAsText(file);
+                        })
+                    });
+                }
+            });
+
+            if (pendingFiles.length === 0) {
+                statusArea.innerText = "Nenhum arquivo de texto útil encontrado na pasta.";
                 return;
             }
-            outputArea.select();
-            document.execCommand('copy');
-            alert('Texto copiado com sucesso para a área de transferência!');
+
+            processNextBatch();
         });
+
     </script>
 </body>
 </html>
