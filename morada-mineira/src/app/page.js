@@ -17,7 +17,7 @@ export default function LoginPage() {
   const [resetSent,  setResetSent]  = useState(false);
 
   useEffect(() => {
-    if (isAuthenticated) router.push("/painel");
+    if (isAuthenticated) router.replace("/painel");
   }, [isAuthenticated, router]);
 
   // limpa erro ao digitar
@@ -32,7 +32,7 @@ export default function LoginPage() {
     setSubmitting(true);
     const result = await login(email, password);
     setSubmitting(false);
-    if (result.success) router.push("/painel");
+    if (result.success) router.replace("/painel");
   }
 
   // ── RESET DE SENHA ─────────────────────────────────────────

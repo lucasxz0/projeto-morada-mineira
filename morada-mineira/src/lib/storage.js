@@ -35,6 +35,7 @@ async function getFromSupabase(table, query = {}) {
   if (!supabase) return null;
   try {
     let q = supabase.from(table).select("*");
+    
     if (query.eq) {
       for (const [col, val] of Object.entries(query.eq)) {
         q = q.eq(col, val);
@@ -43,11 +44,20 @@ async function getFromSupabase(table, query = {}) {
     if (query.order) {
       q = q.order(query.order.column, { ascending: query.order.ascending ?? false });
     }
+    
     const { data, error } = await q;
-    if (error) throw error;
+    
+    // joga a mensagem real na tela!
+    if (error) {
+      console.error(`Erro detalhado na tabela '${table}':`, error);
+      alert(`Erro no banco de dados ao ler '${table}':\n${error.message}`);
+      return null;
+    }
+    
     return data;
   } catch (e) {
-    console.error("Erro Supabase:", e);
+    console.error("Erro crítico na requisição ao Supabase:", e);
+    alert(`Falha de conexão ao tentar ler '${table}'. Veja o console.`);
     return null;
   }
 }
@@ -203,10 +213,32 @@ export const storage = {
     return evidences[idx];
   },
 
-  async deleteEvidence(id) {
+ async deleteEvidence(id) {
     if (isSupabaseConfigured) {
-      return await deleteFromSupabase("evidences", id);
+      try {
+        // 1. Puxar a evidência para descobrir a URL da imagem antes de apagar a linha
+        const { data: ev } = await supabase.from("evidences").select("image_url").eq("id", id).single();
+        
+        if (ev && ev.image_url) {
+          // A URL pública é algo como: https://.../object/public/evidencias/evidences/id-tarefa/foto.jpg
+          // Precisamos recortar apenas o caminho final do arquivo para o Supabase achar
+          const filePath = ev.image_url.split('/public/evidencias/')[1];
+          
+          if (filePath) {
+            // 2. Apagar o arquivo físico do Storage
+            await supabase.storage.from("evidencias").remove([filePath]);
+          }
+        }
+        
+        // 3. Agora sim, apagar a linha da tabela no banco de dados
+        return await deleteFromSupabase("evidences", id);
+      } catch (e) {
+        console.error("Erro ao apagar evidência e arquivo:", e);
+        return false;
+      }
     }
+    
+    // Fallback para o modo Local (sem Supabase)
     const evidences = getFromLocal("morada_evidences") || [];
     setToLocal("morada_evidences", evidences.filter((e) => e.id !== id));
     return true;

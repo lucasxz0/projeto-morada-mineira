@@ -1,7 +1,7 @@
 "use client";
 
 import { getCategoryById, getPriorityById, getStatusById } from "@/config/tasks.config";
-import { formatDateRelative } from "@/lib/dateUtils";
+import { formatDateRelative, formatDateShort } from "@/lib/dateUtils";
 
 export default function TaskCard({ task, onClick }) {
   const category = getCategoryById(task.category);
@@ -47,8 +47,9 @@ export default function TaskCard({ task, onClick }) {
         <span className="task-card-evidence">
           📸 {task.evidence_count || 0} evidência(s)
         </span>
-        <span style={{ fontSize: "0.75rem", color: "var(--text-muted)" }}>
-          {formatDateRelative(task.created_at)}
+        {/* Mostrando o prazo ou Sem Prazo aqui no footer */}
+        <span style={{ fontSize: "0.75rem", color: task.due_date ? "var(--color-danger)" : "var(--text-muted)", fontWeight: task.due_date ? "600" : "normal" }}>
+          {task.due_date ? `Prazo: ${formatDateShort(task.due_date)}` : "Sem prazo final"}
         </span>
       </div>
     </div>

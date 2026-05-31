@@ -148,6 +148,9 @@ export function AuthProvider({ children }) {
     setUser(null);
     setSession(null);
     setUsers([]);
+    
+    // Força o redirecionamento imediato e a limpeza do cache do navegador
+    window.location.href = "/"; 
   }, []);
 
   // ── CADASTRAR FUNCIONÁRIO (apenas gerente usa) ─────────────

@@ -6,7 +6,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { useTasks } from "@/contexts/TaskContext";
 import { useToast } from "@/contexts/ToastContext";
 import { getCategoryById, getPriorityById, getStatusById, TASK_STATUSES } from "@/config/tasks.config";
-import { formatDateFull, formatDateRelative } from "@/lib/dateUtils";
+import { formatDateFull, formatDateRelative, formatDateShort } from "@/lib/dateUtils";
 import PhotoCapture from "@/components/evidence/PhotoCapture";
 import Lightbox from "@/components/ui/Lightbox";
 import Modal from "@/components/ui/Modal";
@@ -17,7 +17,7 @@ export default function TaskDetailPage() {
   const router = useRouter();
   const { user, isGerente } = useAuth();
   
-  // Adicionamos o uploadEvidenceImage aqui na desestruturação
+  // Adicionamos a variável "loading" aqui no final para evitar o pulo da tela
   const { 
     getTaskById, 
     getEvidencesByTask, 
@@ -27,7 +27,8 @@ export default function TaskDetailPage() {
     approveEvidence, 
     rejectEvidence, 
     deleteEvidence,
-    uploadEvidenceImage 
+    uploadEvidenceImage,
+    loading 
   } = useTasks();
   
   const toast = useToast();
@@ -40,6 +41,16 @@ export default function TaskDetailPage() {
   const task = getTaskById(id);
   const taskEvidences = getEvidencesByTask(id);
 
+  // 1. PRIMEIRO checamos se ainda está carregando do banco
+  if (loading) {
+    return (
+      <div style={{ display: "flex", justifyContent: "center", alignItems: "center", minHeight: "60vh" }}>
+        <div className="spinner-sm" style={{ width: 32, height: 32, borderTopColor: "var(--color-primary)" }} />
+      </div>
+    );
+  }
+
+  // 2. SE JÁ CARREGOU e não achou a tarefa, aí sim mostramos o erro
   if (!task) {
     return (
       <div className="empty-state animate-fade">
@@ -69,14 +80,11 @@ export default function TaskDetailPage() {
     }
   }
 
-  // --- FUNÇÃO ATUALIZADA PARA ENVIAR PRO STORAGE ---
   async function handleEvidenceCapture(evidenceData) {
-    // 1. Extraímos o arquivo real (file) do resto dos dados
     const { file, ...restData } = evidenceData;
 
     toast.info("Enviando foto para o servidor...");
     
-    // 2. Faz o upload da foto para o bucket "evidencias" no Supabase
     const uploadedUrl = await uploadEvidenceImage(file, task.id);
 
     if (!uploadedUrl) {
@@ -84,7 +92,6 @@ export default function TaskDetailPage() {
       return;
     }
 
-    // 3. Salva no banco de dados usando a URL pública do Storage
     const result = await addEvidence({ 
       ...restData, 
       image_url: uploadedUrl,
@@ -167,7 +174,7 @@ export default function TaskDetailPage() {
           </div>
           <div className="detail-info-item">
             <div className="detail-info-label">Prazo</div>
-            <div className="detail-info-value">{task.due_date || "Sem prazo"}</div>
+            <div className="detail-info-value">{task.due_date ? formatDateShort(task.due_date) : "Sem prazo final"}</div>
           </div>
         </div>
       </div>

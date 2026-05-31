@@ -2,6 +2,7 @@
 
 import { createContext, useContext, useState, useEffect, useCallback, useRef } from "react";
 import { storage } from "@/lib/storage";
+import { useAuth } from "@/contexts/AuthContext"; // <-- IMPORTAÇÃO ADICIONADA
 
 const TaskContext = createContext(null);
 
@@ -10,6 +11,9 @@ export function TaskProvider({ children }) {
   const [evidences, setEvidences] = useState([]);
   const [loading, setLoading] = useState(true);
 
+  // <-- NOVA CONSTANTE: PEGA O ESTADO DE AUTENTICAÇÃO
+  const { isAuthenticated } = useAuth(); 
+
   // Refs para acesso ao estado mais recente dentro de callbacks
   // Evita dependências de closure stale em useCallback
   const tasksRef = useRef(tasks);
@@ -17,8 +21,10 @@ export function TaskProvider({ children }) {
   tasksRef.current = tasks;
   evidencesRef.current = evidences;
 
-  // Carregar dados iniciais
+  // Carregar dados iniciais (AGORA SÓ RODA SE ESTIVER LOGADO)
   const loadData = useCallback(async () => {
+    if (!isAuthenticated) return; // <-- NOVA TRAVA: Não gasta internet se não estiver logado
+
     setLoading(true);
     try {
       const [taskList, evidenceList] = await Promise.all([
@@ -32,12 +38,19 @@ export function TaskProvider({ children }) {
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [isAuthenticated]); // <-- DEPENDÊNCIA ATUALIZADA
 
+  // <-- NOVO USEEFFECT: ESCUTA A ENTRADA E SAÍDA DE USUÁRIOS
   useEffect(() => {
-    loadData();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+    if (isAuthenticated) {
+      loadData(); // Usuário entrou? Puxa os dados na hora!
+    } else {
+      // Usuário saiu? Limpa a tela para o próximo não ver rastro.
+      setTasks([]);
+      setEvidences([]);
+      setLoading(false);
+    }
+  }, [isAuthenticated, loadData]);
 
   // ── CRUD de Tarefas ──
 
